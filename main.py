@@ -102,6 +102,54 @@ class AccountManager:
             return parts[0] * 3600 + parts[1] * 60 + parts[2]
         return parts[0] * 60 + parts[1]
 
+    def _parse_math_captcha(self, text: str) -> Optional[float]:
+        if not text:
+            return None
+        normalized = text.replace("×", "*").replace("x", "*").replace("X", "*")
+        normalized = normalized.replace("÷", "/").replace(":", "/")
+        normalized = re.sub(r"[^0-9+\-*/().= ]", " ", normalized)
+        expr_match = re.search(r"(\d+[ \t]*[+\-*/][ \t]*\d+)", normalized)
+        if not expr_match:
+            return None
+        expr = expr_match.group(1)
+        try:
+            result = eval(expr, {"__builtins__": None}, {})
+            return float(result)
+        except Exception:
+            return None
+
+    def _find_button_by_answer(self, buttons, answer: float):
+        answer_text = str(int(answer)) if answer.is_integer() else str(answer)
+        for row in buttons:
+            for button in row:
+                text = (getattr(button, "text", None) or "").strip()
+                if not text:
+                    continue
+                normalized = text.replace(" ", "").replace("=", "")
+                if normalized == answer_text:
+                    return button
+                if answer_text in normalized:
+                    return button
+        return None
+
+    async def _solve_robot_check(self, client, last_message):
+        text = (last_message.message or "").lower()
+        if "проверка на робота" not in text and "чтобы получить награду" not in text and "сумму чисел" not in text:
+            return None
+        answer = self._parse_math_captcha(text)
+        if answer is None:
+            return None
+        button = self._find_button_by_answer(last_message.buttons, answer)
+        if not button:
+            return None
+        await client(functions.messages.GetBotCallbackAnswerRequest(
+            peer=CLICKER_TARGET,
+            msg_id=last_message.id,
+            data=button.data,
+        ))
+        await asyncio.sleep(1)
+        return True
+
     async def complete_login(self, phone: str, code: str, password: Optional[str] = None):
         account = self.get_account(phone)
         if not account:
@@ -152,6 +200,27 @@ class AccountManager:
                         break
 
             if button_message and button_message.buttons:
+                # Try to solve robot-check math captcha if it appears
+                solved = await self._solve_robot_check(client, button_message)
+                if solved:
+                    follow_up = await client.get_messages(CLICKER_TARGET, limit=8)
+                    combined = "\n".join((m.message or "") for m in follow_up).lower()
+                    if "ты получил(а) 0.10 ⭐️" in combined or "ты получил(а) 0.10" in combined:
+                        account["last_click_at"] = _now_iso()
+                        account["click_count"] = account.get("click_count", 0) + 1
+                        account["next_click_at"] = self._format_next_click(CLICK_INTERVAL_MINUTES * 60 + CLICK_DELAY_SECONDS)
+                        self._save_accounts()
+                        return "success"
+                    if "не так быстро" in combined or "подожди" in combined:
+                        cooldown = self._parse_cooldown_seconds(combined)
+                        if cooldown is not None:
+                            account["next_click_at"] = self._format_next_click(cooldown)
+                            self._save_accounts()
+                            return f"cooldown:{cooldown}"
+                        account["next_click_at"] = self._format_next_click(CLICK_INTERVAL_MINUTES * 60 + CLICK_DELAY_SECONDS)
+                        self._save_accounts()
+                        return "cooldown"
+
                 target_button = None
                 for row in button_message.buttons:
                     for button in row:

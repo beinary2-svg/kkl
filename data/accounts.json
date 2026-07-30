@@ -6,11 +6,11 @@
     "phone_code_hash": "64bcabdc9e66d89caf",
     "created_at": "2026-07-30T06:09:01Z",
     "status": "active",
-    "last_click_at": "2026-07-30T07:10:58Z",
-    "click_count": 8,
+    "last_click_at": "2026-07-30T07:43:11Z",
+    "click_count": 16,
     "authorized": true,
     "authorized_at": "2026-07-30T06:09:24Z",
-    "next_click_at": "2026-07-30T07:16:59Z"
+    "next_click_at": "2026-07-30T07:49:12Z"
   },
   "+8801926401914": {
     "phone": "+8801926401914",
@@ -19,9 +19,9 @@
     "phone_code_hash": "d031635257e299889a",
     "created_at": "2026-07-30T06:39:56Z",
     "status": "active",
-    "last_click_at": "2026-07-30T07:11:03Z",
-    "click_count": 7,
-    "next_click_at": "2026-07-30T07:17:04Z",
+    "last_click_at": "2026-07-30T07:43:16Z",
+    "click_count": 15,
+    "next_click_at": "2026-07-30T07:49:17Z",
     "authorized": true,
     "authorized_at": "2026-07-30T06:40:07Z"
   },
@@ -32,10 +32,22 @@
     "phone_code_hash": "9d4cadb6719acaf8bd",
     "created_at": "2026-07-30T06:43:14Z",
     "status": "active",
-    "last_click_at": "2026-07-30T07:11:17Z",
-    "click_count": 6,
-    "next_click_at": "2026-07-30T07:17:18Z",
+    "last_click_at": "2026-07-30T07:43:20Z",
+    "click_count": 14,
+    "next_click_at": "2026-07-30T07:49:21Z",
     "authorized": true,
     "authorized_at": "2026-07-30T06:43:28Z"
+  },
+  "+998991693038": {
+    "phone": "+998991693038",
+    "api_id": 37841426,
+    "api_hash": "5329711a1d0b79cecb6f2edf68d93469",
+    "phone_code_hash": "2e90e913607c4ef17c",
+    "created_at": "2026-07-30T07:19:37Z",
+    "status": "pending_code",
+    "last_click_at": null,
+    "click_count": 0,
+    "next_click_at": null,
+    "authorized": false
   }
 }
