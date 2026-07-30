@@ -1,0 +1,2 @@
+aiogram==3.10.0
+telethon==1.44.0
